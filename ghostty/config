@@ -1,0 +1,4 @@
+command = /usr/bin/zsh -l
+shell-integration = detect
+font-family = "JetBrains Mono"
+font-size = 14
