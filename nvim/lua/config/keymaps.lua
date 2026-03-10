@@ -18,4 +18,7 @@ map("n","[d",  vim.diagnostic.goto_prev,  { desc = "Prev Diagnostic" })
 map("n","]d",  vim.diagnostic.goto_next,  { desc = "Next Diagnostic" })
 
 
-
+vim.keymap.set("n", "<F2>", function()
+  vim.opt.paste = not vim.opt.paste:get()
+  print("paste mode: " .. (vim.opt.paste:get() and "ON" or "OFF"))
+end, { desc = "Toggle paste mode" })

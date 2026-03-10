@@ -22,9 +22,8 @@ return {
     end
   end
 
-  vim.keymap.set("n", "<leader><leader>", ToggleNvimTreeFocus, { silent = true })
+  vim.keymap.set("n", "<leader><leader>", ToggleNvimTreeFocus, { silent = true, desc = "Focus File Explorer" })
 
 
   end,
 }
-

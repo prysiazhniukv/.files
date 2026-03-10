@@ -1,4 +1,30 @@
 
+-- LSP keymaps (registered early so they fire before plugin config runs)
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(args)
+    local bufnr = args.buf
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    if not client then return end
+
+    if client.server_capabilities.inlayHintProvider then
+      pcall(vim.lsp.inlay_hint.enable, true, { bufnr = bufnr })
+    end
+
+    local opts = { buffer = bufnr }
+    vim.keymap.set("n", "gd",          vim.lsp.buf.definition,                            vim.tbl_extend("force", opts, { desc = "LSP: Go to Definition" }))
+    vim.keymap.set("n", "gD",          vim.lsp.buf.declaration,                           vim.tbl_extend("force", opts, { desc = "LSP: Go to Declaration" }))
+    vim.keymap.set("n", "grr",         "<cmd>Telescope lsp_references<cr>",               vim.tbl_extend("force", opts, { desc = "LSP: List References" }))
+    vim.keymap.set("n", "gi",          vim.lsp.buf.implementation,                        vim.tbl_extend("force", opts, { desc = "LSP: Go to Implementation" }))
+    vim.keymap.set("n", "gt",          vim.lsp.buf.type_definition,                       vim.tbl_extend("force", opts, { desc = "LSP: Type Definition" }))
+    vim.keymap.set("n", "K",           vim.lsp.buf.hover,                                 vim.tbl_extend("force", opts, { desc = "LSP: Hover Documentation" }))
+    vim.keymap.set("n", "<leader>rn",  vim.lsp.buf.rename,                                vim.tbl_extend("force", opts, { desc = "LSP: Rename Symbol" }))
+    vim.keymap.set("n", "<leader>ca",  vim.lsp.buf.code_action,                           vim.tbl_extend("force", opts, { desc = "LSP: Code Action" }))
+    vim.keymap.set({ "n", "v" }, "<leader>fo",
+      function() require("conform").format({ async = true }) end,
+      vim.tbl_extend("force", opts, { desc = "Format (Conform)" }))
+  end,
+})
+
 -- Return to last cursor position
 vim.api.nvim_create_autocmd("BufReadPost", {
   callback = function()
@@ -10,14 +36,14 @@ vim.api.nvim_create_autocmd("BufReadPost", {
   end,
 })
 
--- Web stack default: 2-space indents
+-- Python default: 4-space indents
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "javascript","javascriptreact","typescript","typescriptreact","tsx","jsx","css","scss","html","json","yaml","toml", "lua" },
+  pattern = { "python" },
   callback = function()
     vim.opt_local.expandtab   = true
-    vim.opt_local.tabstop     = 2
-    vim.opt_local.shiftwidth  = 2
-    vim.opt_local.softtabstop = 2
+    vim.opt_local.tabstop     = 4
+    vim.opt_local.shiftwidth  = 4
+    vim.opt_local.softtabstop = 4
   end,
 })
 
