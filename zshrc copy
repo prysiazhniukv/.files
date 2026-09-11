@@ -1,0 +1,116 @@
+# ─────────────────────────────────────────────────────────────
+#  PATH
+# ─────────────────────────────────────────────────────────────
+export PATH="$HOME/.local/bin:$PATH"
+
+# ─────────────────────────────────────────────────────────────
+#  Colors everywhere
+#  NOTE: everything below uses ANSI *indices* (0-15), not hex.
+#  That means when you swap the Ghostty theme, all of this
+#  recolors itself automatically. Never hardcode hex here.
+# ─────────────────────────────────────────────────────────────
+export CLICOLOR=1
+export LSCOLORS="ExGxFxdxCxDxDxhbhdAbAx"
+export LS_COLORS="di=1;34:ln=1;36:so=1;35:pi=33:ex=1;32:bd=33;1:cd=33;1:su=37;41:sg=30;43:tw=30;42:ow=34;42:*.tar=31:*.tgz=31:*.zip=31:*.gz=31:*.bz2=31:*.xz=31:*.7z=31:*.jpg=35:*.jpeg=35:*.png=35:*.gif=35:*.svg=35:*.webp=35:*.mp4=35:*.mov=35:*.mp3=36:*.wav=36:*.pdf=35:*.md=33:*.json=33:*.yml=33:*.yaml=33:*.toml=33:*.ts=36:*.tsx=36:*.js=33:*.py=32:*.rs=31:*.go=36:*.c=32:*.h=32:*.cpp=32:*.hpp=32:*.sh=1;32:*.lua=34"
+
+export GREP_COLORS='mt=1;33:ln=1;32:fn=1;35:se=90'
+alias grep='grep --color=auto'
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias diff='diff --color=auto'
+alias ip='ip -c'
+
+# less / man in color
+export LESS='-R -i -M --use-color'
+export MANPAGER="less -R --use-color -Dd+r -Du+b -DP+y -DS+k"
+export MANROFFOPT="-P -c"
+
+# ─────────────────────────────────────────────────────────────
+#  Completion: colored, menu-driven, case-insensitive
+# ─────────────────────────────────────────────────────────────
+autoload -Uz compinit && compinit -C
+
+zstyle ':completion:*' menu select
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*:descriptions' format '%F{11}%B── %d ──%b%f'
+zstyle ':completion:*:messages'     format '%F{13}%B── %d ──%b%f'
+zstyle ':completion:*:warnings'     format '%F{9}%B── no matches ──%b%f'
+zstyle ':completion:*:corrections'  format '%F{14}%B── %d (errors: %e) ──%b%f'
+zstyle ':completion:*' verbose true
+zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=1;31'
+
+# highlight the region / pasted text so the terminal feels alive
+zle_highlight=(region:bg=8 special:fg=13 suffix:fg=11 isearch:fg=0,bg=11 paste:fg=14)
+
+# ─────────────────────────────────────────────────────────────
+#  Git info in the prompt
+# ─────────────────────────────────────────────────────────────
+autoload -Uz vcs_info
+zstyle ':vcs_info:*' enable git
+zstyle ':vcs_info:git:*' check-for-changes true
+zstyle ':vcs_info:git:*' unstagedstr '%F{3}*'
+zstyle ':vcs_info:git:*' stagedstr   '%F{3}+'
+zstyle ':vcs_info:git:*' formats       ' %F{12}(%F{10}%b%c%u%F{12})%f'
+zstyle ':vcs_info:git:*' actionformats ' %F{12}(%F{10}%b%c%u %F{9}%a%F{12})%f'
+
+precmd() { vcs_info }
+setopt prompt_subst
+
+# ─────────────────────────────────────────────────────────────
+#  Prompt (af-magic style)
+#    ~/path (branch*) »            [exit ↵] [venv] user@host
+# ─────────────────────────────────────────────────────────────
+# venv is shown on the right, so stop activate scripts from prefixing PS1
+export VIRTUAL_ENV_DISABLE_PROMPT=1
+
+_venv_info() {
+  local env
+  if [[ -n $VIRTUAL_ENV ]]; then
+    env=${VIRTUAL_ENV:t}
+    # uv/venv dirs are usually .venv or venv; show the project name instead
+    [[ $env == (.venv|venv) ]] && env=${VIRTUAL_ENV:h:t}
+  elif [[ -n $CONDA_DEFAULT_ENV ]]; then
+    env=$CONDA_DEFAULT_ENV
+  fi
+  [[ -n $env ]] && print -n " %F{12}[$env]%f"
+}
+
+PROMPT='%F{4}%~%f${vcs_info_msg_0_} %F{5}%(!.#.»)%f '
+PS2='%F{9}\ %f'
+
+RPROMPT='%(?..%F{9}%? ↵%f)$(_venv_info) %F{8}%n@%m%f'
+
+# ─────────────────────────────────────────────────────────────
+#  History
+# ─────────────────────────────────────────────────────────────
+HISTFILE=~/.zsh_history
+HISTSIZE=50000
+SAVEHIST=50000
+setopt SHARE_HISTORY HIST_IGNORE_ALL_DUPS HIST_IGNORE_SPACE HIST_REDUCE_BLANKS
+setopt AUTO_CD AUTO_PUSHD PUSHD_IGNORE_DUPS INTERACTIVE_COMMENTS
+
+# up/down arrow searches history by what you've already typed
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey '^[[A' up-line-or-beginning-search
+bindkey '^[[B' down-line-or-beginning-search
+
+# ─────────────────────────────────────────────────────────────
+#  Aliases
+# ─────────────────────────────────────────────────────────────
+alias ls='ls -G'
+alias ll='ls -lhG'
+alias la='ls -lhAG'
+alias l='ls -CFG'
+alias ..='cd ..'
+alias ...='cd ../..'
+
+alias gs='git status -sb'
+alias gd='git diff'
+alias gl='git log --graph --abbrev-commit --decorate --all \
+  --format=format:"%C(bold blue)%h%C(reset) %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)"'
+alias gll='git log --graph --decorate --stat --date=relative'
+

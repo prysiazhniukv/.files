@@ -1,0 +1,78 @@
+# Set the default terminal terminfo
+set -g default-terminal "xterm-256color"
+# True colour support
+set -as terminal-overrides ",xterm*:Tc"
+
+# set -g default-shell /bin/zsh
+# set -g default-command /bin/zsh
+
+
+# Enable mouse support (select windows, panes, resize)
+set -g mouse on
+# set-option -g prefix C-x
+
+# Better pane splitting (use vim-style keys)
+bind - split-window -h
+bind | split-window -v
+
+# Resize panes with Ctrl+Shift+arrow
+bind -n S-C-Left resize-pane -L 5
+bind -n S-C-Right resize-pane -R 5
+bind -n S-C-Up resize-pane -U 5
+bind -n S-C-Down resize-pane -D 5
+
+###############
+# Copy to OS clipboard on macOS + Linux
+###############
+
+# Use a helper to detect platform inside tmux
+if-shell "command -v pbcopy >/dev/null 2>&1" \
+  "set-option -g set-clipboard on; bind -Tcopy-mode-vi y send -X copy-pipe-no-clear 'pbcopy'" \
+  ""
+
+if-shell "command -v xclip >/dev/null 2>&1" \
+  "set-option -g set-clipboard on; bind -Tcopy-mode-vi y send -X copy-pipe-no-clear 'xclip -selection clipboard -i'" \
+  ""
+
+if-shell "command -v wl-copy >/dev/null 2>&1" \
+  "set-option -g set-clipboard on; bind -Tcopy-mode-vi y send -X copy-pipe-no-clear 'wl-copy'" \
+  ""
+
+# Use vim-like copy mode
+setw -g mode-keys vi
+
+# Faster escape key
+set -sg escape-time 0
+
+# #################
+# # Visualization #
+# #################
+
+# Status bar small & clean
+
+set -g status-bg black
+set -g status-fg white
+set -g status-left-length 40
+set -g status-right-length 100
+
+set -g status-left "#[bold] #S "
+set -g status-right "#[fg=green]#(whoami) #[fg=cyan]%Y-%m-%d %H:%M "
+
+# Window & pane styling
+set -g window-style 'bg=colour233'
+set -g window-active-style 'bg=black'
+
+#############
+# Usability #
+#############
+
+# Reload config quickly
+bind r source-file ~/.tmux.conf \; display-message "Reloaded!"
+
+# Start with 1 instead of 0
+set -g base-index 1
+setw -g pane-base-index 1
+
+# Auto rename windows off
+set -g allow-rename off
+
